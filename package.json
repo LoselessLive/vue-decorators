@@ -2,7 +2,7 @@
   "name": "vue-decorators",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/vue-decorators.js",
   "scripts": {
     "build": "rollup -c ./rollup.config.js && uglifyjs dist/vue-decorators.js -cm --comments -o dist/vue-decorators.min.js"
   },
