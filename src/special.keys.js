@@ -5,6 +5,7 @@ export default {
   'COMPUTED': '$_vd_computed',
   'LIFECYCLE': '$_vd_lifecycle',
   'COMPONENTS': '$_vd_components',
+  'FILTERS': '$_vd_filter',
 
   'STATES': '$_vd_states',
   'GETTERS': '$_vd_getters',

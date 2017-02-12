@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.0.4 (beta)
+> This is Vue Decorators v1.0.5 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -16,13 +16,14 @@ npm install --save vue-decorators
 
 ## Decorators
 
-There are 10 decorators:
+There are 11 decorators:
 
 * `@Component` or `@Component({ ... })`
 * `@Components({ ... })`
 * `@Prop` or `@Prop({ ... })`
 * `@Watch` or `@Watch('...')`
 * `@Lifecycle` or `@Lifecycle('...')`
+* `@Filter` or `@Filter('...')`
 * `@Computed`
 
 * `@State` or `@State('...')`
@@ -42,6 +43,7 @@ import {
   Watch,
   Lifecycle,
   Computed,
+  Filter,
 
   State,
   Action,
@@ -80,9 +82,12 @@ export class MyComponent extends Vue {
   created(){ /* ... */ }
 
   @Computed
-  computedMethos(){ /* ... */ }
+  computedMethod(){ /* ... */ }
 
-  normalVueMethods(){
+  @Filter
+  filterName(){ /* ... */ }
+
+  normalVueMethod(){
     /* ... */
     this.login().then(function(){ /* ... */ });
   }

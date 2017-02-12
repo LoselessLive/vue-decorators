@@ -5,6 +5,8 @@ import Watch from './vue/watch';
 import Computed from './vue/computed';
 import Lifecycle from './vue/lifecycle';
 
+import Filter from './vue/filter';
+
 import State from './vuex/state';
 import Action from './vuex/action';
 import Getter from './vuex/getter';
@@ -18,6 +20,8 @@ export {
   Watch,
   Computed,
   Lifecycle,
+
+  Filter,
 
   State,
   Action,
