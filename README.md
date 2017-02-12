@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.0.3 (beta)
+> This is Vue Decorators v1.0.4 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -16,7 +16,7 @@ npm install --save vue-decorators
 
 ## Decorators
 
-There are 8 decorators:
+There are 10 decorators:
 
 * `@Component` or `@Component({ ... })`
 * `@Components({ ... })`
