@@ -1,5 +1,5 @@
 /**
- * Vue-decorators v1.0.0
+ * Vue-decorators v1.0.1
  * (c) 2017 Paweł Partyka
  * @license MIT
  */
@@ -15,7 +15,9 @@ var specialKeys = {
   'PROPS': '$_vd_props',
   'METHODS': '$_vd_methods',
   'WATCHERS': '$_vd_watchers',
+  'COMPUTED': '$_vd_computed',
   'LIFECYCLE': '$_vd_lifecycle',
+  'COMPONENTS': '$_vd_components',
 
   'STATES': '$_vd_states',
   'GETTERS': '$_vd_getters',
@@ -70,6 +72,7 @@ function combineDataObject(vm, Component) {
 function componentFactory(Component) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+  var noptions = {};
   var proto = Component.prototype;
   var Super = proto instanceof Vue ? proto.constructor : Vue;
 
@@ -118,20 +121,19 @@ function componentFactory(Component) {
     }
   }
 
-  options = _extends({}, options, proto[specialKeys.LIFECYCLE]);
-  options.name = options.name || Component.name;
-  options.data = options.data;
-  options.props = _extends({}, options.props, proto[specialKeys.PROPS]);
-  options.watch = _extends({}, options.watch, proto[specialKeys.WATCHERS]);
-  options.computed = _extends({}, options.computed, proto[specialKeys.STATES], proto[specialKeys.GETTERS]);
-  options.methods = _extends({}, options.methods, proto[specialKeys.METHODS], proto[specialKeys.ACTIONS], proto[specialKeys.MUTATIONS]);
-  (options.mixins || (options.mixins = [])).push({
-    data: function data() {
-      return combineDataObject(this, Component);
-    }
-  });
+  noptions = _extends({}, options, proto[specialKeys.LIFECYCLE]);
+  noptions.name = options.name || Component.name;
+  noptions.data = function () {
+    return combineDataObject(this, Component);
+  };
+  noptions.props = _extends({}, options.props, proto[specialKeys.PROPS]);
+  noptions.components = _extends({}, options.components, Component[specialKeys.COMPONENTS]);
+  noptions.computed = _extends({}, options.computed, proto[specialKeys.COMPUTED], proto[specialKeys.STATES], proto[specialKeys.GETTERS]);
+  noptions.methods = _extends({}, options.methods, proto[specialKeys.METHODS], proto[specialKeys.ACTIONS], proto[specialKeys.MUTATIONS]);
+  noptions.watch = _extends({}, options.watch, proto[specialKeys.WATCHERS]);
+  noptions.mixins = _extends({}, options.mixins);
 
-  return Super.extend(options);
+  return Super.extend(noptions);
 }
 
 function Component(options) {
@@ -139,12 +141,30 @@ function Component(options) {
     return componentFactory(options);
   }
 
-  return function (Component) {
-    return componentFactory(Component, options);
+  return componentFactory(Component, options);
+}
+
+var _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function makePropDecorator(options) {
+  return function (target, key) {
+    if (!target[specialKeys.COMPONENTS]) {
+      target[specialKeys.COMPONENTS] = {};
+    }
+
+    target[specialKeys.COMPONENTS] = _extends$1({}, target[specialKeys.COMPONENTS], options);
   };
 }
 
-function makePropDecorator(options) {
+function Components(options, key, descriptor) {
+  if (options instanceof Vue) {
+    return makePropDecorator()(options, key);
+  }
+
+  return makePropDecorator(options);
+}
+
+function makePropDecorator$1(options) {
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
       target[specialKeys.USED_PROPS] = {};
@@ -163,10 +183,10 @@ function makePropDecorator(options) {
 
 function Prop(options, key, descriptor) {
   if (options instanceof Vue) {
-    return makePropDecorator()(options, key);
+    return makePropDecorator$1()(options, key);
   }
 
-  return makePropDecorator(options);
+  return makePropDecorator$1(options);
 }
 
 function makeWatchDecorator(options) {
@@ -192,6 +212,31 @@ function Watch(options, key, descriptor) {
   }
 
   return makeWatchDecorator(options);
+}
+
+function makeWatchDecorator$1(options) {
+  return function (target, key) {
+    if (!target[specialKeys.USED_PROPS]) {
+      target[specialKeys.USED_PROPS] = {};
+    }
+
+    if (!target[specialKeys.COMPUTED]) {
+      target[specialKeys.COMPUTED] = {};
+    }
+
+    if (!target[specialKeys.COMPUTED][options || key]) {
+      target[specialKeys.USED_PROPS][key] = true;
+      target[specialKeys.COMPUTED][options || key] = target[key];
+    }
+  };
+}
+
+function Computed(options, key, descriptor) {
+  if (options instanceof Vue) {
+    return makeWatchDecorator$1()(options, key);
+  }
+
+  return makeWatchDecorator$1(options);
 }
 
 function makeLifecycleDecorator(options) {
@@ -320,8 +365,10 @@ var mutation = function (options, key, descriptor) {
 };
 
 exports.Component = Component;
+exports.Components = Components;
 exports.Prop = Prop;
 exports.Watch = Watch;
+exports.Computed = Computed;
 exports.Lifecycle = Lifecycle;
 exports.State = state;
 exports.Action = action;

@@ -19,6 +19,7 @@ function combineDataObject(vm, Component){
 }
 
 function componentFactory(Component, options = {}){
+  let noptions = {};
   let proto = Component.prototype;
   let Super = proto instanceof Vue ? proto.constructor : Vue;
 
@@ -45,36 +46,43 @@ function componentFactory(Component, options = {}){
   }
 
   /** Combine **/
-  options = {
+  noptions = {
     ...options,
     ...proto[specialKeys.LIFECYCLE]
   };
-  options.name = options.name || Component.name;
-  options.data = options.data;
-  options.props = {
+  noptions.name = options.name || Component.name;
+  noptions.data = function(){
+    return combineDataObject(this, Component);
+  };
+  noptions.props = {
     ...options.props,
     ...proto[specialKeys.PROPS]
   };
-  options.watch = {
-    ...options.watch,
-    ...proto[specialKeys.WATCHERS]
+  noptions.components = {
+    ...options.components,
+    ...Component[specialKeys.COMPONENTS]
   };
-  options.computed = {
+  noptions.computed = {
     ...options.computed,
+    ...proto[specialKeys.COMPUTED],
     ...proto[specialKeys.STATES],
     ...proto[specialKeys.GETTERS]
   };
-  options.methods = {
+  noptions.methods = {
     ...options.methods,
     ...proto[specialKeys.METHODS],
     ...proto[specialKeys.ACTIONS],
     ...proto[specialKeys.MUTATIONS]
   };
-  (options.mixins || (options.mixins = [])).push({
-    data: function(){ return combineDataObject(this, Component); }
-  });
+  noptions.watch = {
+    ...options.watch,
+    ...proto[specialKeys.WATCHERS]
+  };
+  noptions.mixins = {
+    ...options.mixins
+  };
 
-  return Super.extend(options);
+  return Super.extend(noptions);
 }
 
 export default function Component(options){
@@ -82,7 +90,5 @@ export default function Component(options){
     return componentFactory(options);
   }
 
-  return function(Component){
-    return componentFactory(Component, options);
-  };
+  return componentFactory(Component, options);
 };
