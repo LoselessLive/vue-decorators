@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.0.1 (beta)
+> This is Vue Decorators v1.0.3 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -19,9 +19,11 @@ npm install --save vue-decorators
 There are 8 decorators:
 
 * `@Component` or `@Component({ ... })`
+* `@Components({ ... })`
 * `@Prop` or `@Prop({ ... })`
 * `@Watch` or `@Watch('...')`
 * `@Lifecycle` or `@Lifecycle('...')`
+* `@Computed`
 
 * `@State` or `@State('...')`
 * `@Action` or `@Action('...')`
@@ -35,17 +37,25 @@ There are 8 decorators:
 import Vue from 'vue'
 import {
   Component,
+  Components,
   Prop,
   Watch,
   Lifecycle,
+  Computed,
 
   State,
   Action,
   Getter,
   Mutation
-} from 'vue-decorators'
+} from 'vue-decorators';
+import Component1 from '...';
+import Component2 from '...';
 
 @Component
+@Components({
+    Component1,
+    Component2
+})
 export class MyComponent extends Vue {
   credentials = {
     username: '',
@@ -68,6 +78,9 @@ export class MyComponent extends Vue {
 
   @Lifecycle
   created(){ /* ... */ }
+
+  @Computed
+  computedMethos(){ /* ... */ }
 
   normalVueMethods(){
     /* ... */
