@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.1.1 (beta)
+> This is Vue Decorators v1.1.2 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -31,7 +31,7 @@ Vue-decorators has 16 decorators, for example:
 * `@Getter` or `@Getter('...')`
 * `@Mutation` or `@Mutation('...')`
 
-Other decorators can see the [documentation](https://github.com/partyka95/vue-decorators/wiki)
+Other decorators you can see in the [documentation](https://github.com/partyka95/vue-decorators/wiki).
 
 
 ## Example
