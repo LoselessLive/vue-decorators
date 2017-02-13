@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.1.0 (beta)
+> This is Vue Decorators v1.1.1 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -19,7 +19,7 @@ npm install --save vue-decorators
 Vue-decorators has 16 decorators, for example:
 
 * `@Component` or `@Component({ ... })`
-* `@Components({ ... })`
+* `@InjectComponents({ ... })`
 * `@Prop` or `@Prop({ ... })`
 * `@Watch` or `@Watch('...')`
 * `@Lifecycle` or `@Lifecycle('...')`
