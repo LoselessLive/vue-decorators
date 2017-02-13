@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import specialKeys from '../special.keys';
 
-function combineDataObject(vm, Component){
+function combineDataObject(vm, Component, optionsData){
   let instanceComponent = new Component();
   let data = new Set(Object.getOwnPropertyNames(instanceComponent));
 
@@ -9,7 +9,31 @@ function combineDataObject(vm, Component){
     data.delete(key);
   });
 
+  for(let key in Component.prototype[specialKeys.USED_PROPS]){
+    data.delete(key);
+  }
+
   let plainData = {};
+
+  if(optionsData){
+    if(typeof optionsData === 'function'){
+      plainData = {
+        ...plainData,
+        ...(new optionsData())
+      };
+    } else {
+      plainData = {
+        ...plainData,
+        ...optionsData
+      };
+    }
+  }
+
+  if(Component[specialKeys.DATA]){
+    for(let key in Component[specialKeys.DATA]){
+      plainData[key] = Component[specialKeys.DATA][key];
+    }
+  }
 
   for(let key of data.values()){
     plainData[key] = instanceComponent[key];
@@ -22,7 +46,6 @@ function componentFactory(options = {}){
   return function(Component){
     let noptions = {};
     let proto = Component.prototype;
-    let Super = proto instanceof Vue ? proto.constructor : Vue;
 
     /** Methods **/
     if(!proto[specialKeys.METHODS]){
@@ -53,7 +76,7 @@ function componentFactory(options = {}){
     };
     noptions.name = options.name || Component.name;
     noptions.data = function(){
-      return combineDataObject(this, Component);
+      return combineDataObject(this, Component, options.data);
     };
     noptions.props = {
       ...options.props,
@@ -84,7 +107,18 @@ function componentFactory(options = {}){
       ...proto[specialKeys.FILTERS]
     };
 
-    return Super.extend(noptions);
+    if(Component[specialKeys.TEMPLATE]){
+      noptions.template = Component[specialKeys.TEMPLATE];
+    }
+
+    if(options.mixins){
+      (noptions.mixins || (noptions.mixins = [])).push(...options.mixins);
+    }
+    if(Component[specialKeys.MIXINS]){
+      (noptions.mixins || (noptions.mixins = [])).push(...Component[specialKeys.MIXINS]);
+    }
+
+    return noptions;
   }
 }
 

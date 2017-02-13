@@ -13,8 +13,16 @@ function makeStateDecorator(options){
     }
 
     if(!target[specialKeys.STATES][key]){
+      let fc;
+
+      if(typeof options === 'function'){
+        fc = mapState({[key]: options})[key];
+      } else {
+        fc = mapState([options || key])[options || key];
+      }
+
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.STATES][key] = mapState([options || key])[options || key];
+      target[specialKeys.STATES][key] = fc;
     }
   }
 }

@@ -5,7 +5,7 @@ const version = process.env.VERSION || require('./package.json').version;
 module.exports = {
     entry: 'src/index.js',
     dest: 'dist/vue-decorators.js',
-    format: 'umd',
+    format: 'cjs',
     moduleName: 'vue-decorators',
     external: ['vue', 'vuex'],
     plugins: [

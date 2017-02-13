@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.0.6 (beta)
+> This is Vue Decorators v1.1.0 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
@@ -16,7 +16,7 @@ npm install --save vue-decorators
 
 ## Decorators
 
-There are 11 decorators:
+Vue-decorators has 16 decorators, for example:
 
 * `@Component` or `@Component({ ... })`
 * `@Components({ ... })`
@@ -31,6 +31,8 @@ There are 11 decorators:
 * `@Getter` or `@Getter('...')`
 * `@Mutation` or `@Mutation('...')`
 
+Other decorators can see the [documentation](https://github.com/partyka95/vue-decorators/wiki)
+
 
 ## Example
 
@@ -38,7 +40,7 @@ There are 11 decorators:
 import Vue from 'vue'
 import {
   Component,
-  Components,
+  InjectComponents,
   Prop,
   Watch,
   Lifecycle,
@@ -54,7 +56,7 @@ import Component1 from '...';
 import Component2 from '...';
 
 @Component
-@Components({
+@InjectComponents({
     Component1,
     Component2
 })

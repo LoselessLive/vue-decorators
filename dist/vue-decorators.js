@@ -1,24 +1,30 @@
 /**
- * Vue-decorators v1.0.5
+ * Vue-decorators v1.1.0
  * (c) 2017 Paweł Partyka
  * @license MIT
  */
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('vue'), require('vuex')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'vue', 'vuex'], factory) :
-	(factory((global['vue-decorators'] = global['vue-decorators'] || {}),global.Vue,global.vuex));
-}(this, (function (exports,Vue,vuex) { 'use strict';
+'use strict';
 
-Vue = 'default' in Vue ? Vue['default'] : Vue;
+Object.defineProperty(exports, '__esModule', { value: true });
+
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var Vue = _interopDefault(require('vue'));
+var vuex = require('vuex');
 
 var specialKeys = {
+  'DATA': '$_vd_data',
+
   'PROPS': '$_vd_props',
   'METHODS': '$_vd_methods',
   'WATCHERS': '$_vd_watchers',
   'COMPUTED': '$_vd_computed',
   'LIFECYCLE': '$_vd_lifecycle',
   'COMPONENTS': '$_vd_components',
-  'FILTERS': '$_vd_filter',
+  'FILTERS': '$_vd_filters',
+
+  'TEMPLATE': '$_vd_template',
+  'MIXINS': '$_vd_mixins',
 
   'STATES': '$_vd_states',
   'GETTERS': '$_vd_getters',
@@ -32,7 +38,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-function combineDataObject(vm, Component) {
+function combineDataObject(vm, Component, optionsData) {
   var instanceComponent = new Component();
   var data = new Set(Object.getOwnPropertyNames(instanceComponent));
 
@@ -40,7 +46,25 @@ function combineDataObject(vm, Component) {
     data.delete(key);
   });
 
+  for (var key in Component.prototype[specialKeys.USED_PROPS]) {
+    data.delete(key);
+  }
+
   var plainData = {};
+
+  if (optionsData) {
+    if (typeof optionsData === 'function') {
+      plainData = _extends({}, plainData, new optionsData());
+    } else {
+      plainData = _extends({}, plainData, optionsData);
+    }
+  }
+
+  if (Component[specialKeys.DATA]) {
+    for (var _key in Component[specialKeys.DATA]) {
+      plainData[_key] = Component[specialKeys.DATA][_key];
+    }
+  }
 
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
@@ -48,9 +72,9 @@ function combineDataObject(vm, Component) {
 
   try {
     for (var _iterator = data.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var key = _step.value;
+      var _key2 = _step.value;
 
-      plainData[key] = instanceComponent[key];
+      plainData[_key2] = instanceComponent[_key2];
     }
   } catch (err) {
     _didIteratorError = true;
@@ -76,7 +100,6 @@ function componentFactory() {
   return function (Component) {
     var noptions = {};
     var proto = Component.prototype;
-    var Super = proto instanceof Vue ? proto.constructor : Vue;
 
     /** Methods **/
     if (!proto[specialKeys.METHODS]) {
@@ -91,8 +114,8 @@ function componentFactory() {
     }
 
     if (proto[specialKeys.USED_PROPS]) {
-      for (var _key in proto[specialKeys.USED_PROPS]) {
-        componentMethods.delete(_key);
+      for (var _key3 in proto[specialKeys.USED_PROPS]) {
+        componentMethods.delete(_key3);
       }
     }
 
@@ -126,7 +149,7 @@ function componentFactory() {
     noptions = _extends({}, options, proto[specialKeys.LIFECYCLE]);
     noptions.name = options.name || Component.name;
     noptions.data = function () {
-      return combineDataObject(this, Component);
+      return combineDataObject(this, Component, options.data);
     };
     noptions.props = _extends({}, options.props, proto[specialKeys.PROPS]);
     noptions.components = _extends({}, options.components, Component[specialKeys.COMPONENTS]);
@@ -135,7 +158,22 @@ function componentFactory() {
     noptions.watch = _extends({}, options.watch, proto[specialKeys.WATCHERS]);
     noptions.filters = _extends({}, options.filters, proto[specialKeys.FILTERS]);
 
-    return Super.extend(noptions);
+    if (Component[specialKeys.TEMPLATE]) {
+      noptions.template = Component[specialKeys.TEMPLATE];
+    }
+
+    if (options.mixins) {
+      var _ref;
+
+      (_ref = noptions.mixins || (noptions.mixins = [])).push.apply(_ref, _toConsumableArray(options.mixins));
+    }
+    if (Component[specialKeys.MIXINS]) {
+      var _ref2;
+
+      (_ref2 = noptions.mixins || (noptions.mixins = [])).push.apply(_ref2, _toConsumableArray(Component[specialKeys.MIXINS]));
+    }
+
+    return noptions;
   };
 }
 
@@ -149,24 +187,70 @@ function Component(options) {
 
 var _extends$1 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-function makeComponentsDecorator(options) {
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function Data(data) {
+  if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) !== 'object') {
+    console.error('[Vue decorator error] data must be a object');
+
+    return data;
+  }
+
   return function (target) {
-    if (!target[specialKeys.COMPONENTS]) {
-      target[specialKeys.COMPONENTS] = {};
+    if (!target[specialKeys.DATA]) {
+      target[specialKeys.DATA] = {};
     }
 
-    target[specialKeys.COMPONENTS] = _extends$1({}, target[specialKeys.COMPONENTS], options);
+    target[specialKeys.DATA] = _extends$1({}, target[specialKeys.DATA], data);
 
     return target;
   };
 }
 
-function Components(options) {
-  if (options instanceof Vue) {
-    return makeComponentsDecorator()(options);
+var _extends$2 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$1 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function InjectComponent(componentName, component) {
+  if ((typeof component === 'undefined' ? 'undefined' : _typeof$1(component)) !== 'object') {
+    console.error('[Vue decorator error] component must be a vue component object');
+
+    return component;
   }
 
-  return makeComponentsDecorator(options);
+  return function (target) {
+    if (!target[specialKeys.COMPONENTS]) {
+      target[specialKeys.COMPONENTS] = {};
+    }
+
+    target[specialKeys.COMPONENTS] = _extends$2({}, target[specialKeys.COMPONENTS], _defineProperty({}, componentName, component));
+
+    return target;
+  };
+}
+
+var _extends$3 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function InjectComponents(components) {
+  if ((typeof components === 'undefined' ? 'undefined' : _typeof$2(components)) !== 'object') {
+    console.error('[Vue decorator error] components must be a object');
+
+    return components;
+  }
+
+  return function (target) {
+    if (!target[specialKeys.COMPONENTS]) {
+      target[specialKeys.COMPONENTS] = {};
+    }
+
+    target[specialKeys.COMPONENTS] = _extends$3({}, target[specialKeys.COMPONENTS], components);
+
+    return target;
+  };
 }
 
 function makePropDecorator(options) {
@@ -294,6 +378,64 @@ function Filter(options, key, descriptor) {
   return makeFilterDecorator(options);
 }
 
+function Template(template) {
+  if (typeof template !== 'string') {
+    console.error('[Vue decorator error] template must be a string');
+
+    return template;
+  }
+
+  return function (target) {
+    target[specialKeys.TEMPLATE] = template;
+
+    return target;
+  };
+}
+
+var _typeof$3 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function Mixin(mixin) {
+  if ((typeof mixin === 'undefined' ? 'undefined' : _typeof$3(mixin)) !== 'object') {
+    console.error('[Vue decorator error] mixin must be a object');
+
+    return mixin;
+  }
+
+  return function (target) {
+    if (target[specialKeys.MIXINS]) {
+      target[specialKeys.MIXINS].push(mixin);
+    } else {
+      target[specialKeys.MIXINS] = [mixin];
+    }
+
+    return target;
+  };
+}
+
+function _toConsumableArray$1(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function Mixins(mixins) {
+  if (!(mixins instanceof Array)) {
+    console.error('[Vue decorator error] mixins must be a array');
+
+    return mixins;
+  }
+
+  return function (target) {
+    if (target[specialKeys.MIXINS]) {
+      var _target$specialKeys$M;
+
+      (_target$specialKeys$M = target[specialKeys.MIXINS]).push.apply(_target$specialKeys$M, _toConsumableArray$1(mixins));
+    } else {
+      target[specialKeys.MIXINS] = mixins;
+    }
+
+    return target;
+  };
+}
+
+function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function makeStateDecorator(options) {
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
@@ -305,8 +447,16 @@ function makeStateDecorator(options) {
     }
 
     if (!target[specialKeys.STATES][key]) {
+      var fc = void 0;
+
+      if (typeof options === 'function') {
+        fc = vuex.mapState(_defineProperty$1({}, key, options))[key];
+      } else {
+        fc = vuex.mapState([options || key])[options || key];
+      }
+
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.STATES][key] = vuex.mapState([options || key])[options || key];
+      target[specialKeys.STATES][key] = fc;
     }
   };
 }
@@ -395,17 +545,18 @@ var mutation = function (options, key, descriptor) {
 };
 
 exports.Component = Component;
-exports.Components = Components;
+exports.Data = Data;
+exports.InjectComponent = InjectComponent;
+exports.InjectComponents = InjectComponents;
 exports.Prop = Prop;
 exports.Watch = Watch;
 exports.Computed = Computed;
 exports.Lifecycle = Lifecycle;
 exports.Filter = Filter;
+exports.Template = Template;
+exports.Mixin = Mixin;
+exports.Mixins = Mixins;
 exports.State = state;
 exports.Action = action;
 exports.Getter = getter;
 exports.Mutation = mutation;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
