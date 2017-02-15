@@ -1,5 +1,5 @@
 # Vue Decorators
-> This is Vue Decorators v1.1.3 (beta)
+> This is Vue Decorators v1.1.4 (beta)
 
 Vue & Vuex Decorators for ECMAscript
 
