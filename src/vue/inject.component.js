@@ -1,6 +1,6 @@
 import specialKeys from '../special.keys';
 
-export default function InjectComponent(componentName, component) {
+export function InjectComponent(componentName, component) {
   if(typeof component !== 'object'){
     console.error('[Vue decorator error] component must be a vue component object');
 
@@ -19,4 +19,4 @@ export default function InjectComponent(componentName, component) {
 
     return target;
   }
-};
+}

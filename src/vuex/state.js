@@ -27,7 +27,7 @@ function makeStateDecorator(options){
   }
 }
 
-export default function(options, key, descriptor){
+export function State(options, key, descriptor){
   if(options instanceof Vue){
     return makeStateDecorator()(options, key);
   }

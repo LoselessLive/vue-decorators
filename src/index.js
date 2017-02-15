@@ -1,40 +1,20 @@
-import Component from './vue/component';
-import Data from './vue/data';
-import InjectComponent from './vue/inject.component';
-import InjectComponents from './vue/inject.components';
-import Prop from './vue/prop';
-import Watch from './vue/watch';
-import Computed from './vue/computed';
-import Lifecycle from './vue/lifecycle';
+/** Vue decorators **/
+export {Component} from './vue/component';
+export {InjectComponent} from './vue/inject.component';
+export {InjectComponents} from './vue/inject.components';
 
-import Filter from './vue/filter';
-import Template from './vue/template';
-import Mixin from './vue/mixin';
-import Mixins from './vue/mixins';
+export {Data} from './vue/data';
+export {Prop} from './vue/prop';
+export {Watch} from './vue/watch';
+export {Mixin} from './vue/mixin';
+export {Mixins} from './vue/mixins';
+export {Filter} from './vue/filter';
+export {Template} from './vue/template';
+export {Computed} from './vue/computed';
+export {Lifecycle} from './vue/lifecycle';
 
-import State from './vuex/state';
-import Action from './vuex/action';
-import Getter from './vuex/getter';
-import Mutation from './vuex/mutation';
-
-export {
-  Component,
-  Data,
-  InjectComponent,
-  InjectComponents,
-
-  Prop,
-  Watch,
-  Computed,
-  Lifecycle,
-  Filter,
-
-  Template,
-  Mixin,
-  Mixins,
-
-  State,
-  Action,
-  Getter,
-  Mutation
-};
+/** Vuex decorators **/
+export {State} from './vuex/state';
+export {Action} from './vuex/action';
+export {Getter} from './vuex/getter';
+export {Mutation} from './vuex/mutation';

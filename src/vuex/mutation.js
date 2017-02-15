@@ -19,7 +19,7 @@ function makeMutationDecorator(options){
   }
 }
 
-export default function(options, key, descriptor){
+export function Mutation(options, key, descriptor){
   if(options instanceof Vue){
     return makeMutationDecorator()(options, key);
   }

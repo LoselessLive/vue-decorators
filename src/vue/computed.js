@@ -18,10 +18,10 @@ function makeWatchDecorator(options){
   };
 }
 
-export default function Computed(options, key, descriptor){
+export function Computed(options, key, descriptor){
   if(options instanceof Vue){
     return makeWatchDecorator()(options, key);
   }
 
   return makeWatchDecorator(options);
-};
+}

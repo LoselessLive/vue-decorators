@@ -18,10 +18,10 @@ function makeFilterDecorator(options){
   };
 }
 
-export default function Filter(options, key, descriptor){
+export function Filter(options, key, descriptor){
   if(options instanceof Vue){
     return makeFilterDecorator()(options, key);
   }
 
   return makeFilterDecorator(options);
-};
+}

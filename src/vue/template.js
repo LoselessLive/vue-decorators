@@ -1,6 +1,6 @@
 import specialKeys from '../special.keys';
 
-export default function Template(template) {
+export function Template(template) {
   if(typeof template !== 'string'){
     console.error('[Vue decorator error] template must be a string');
 
@@ -12,4 +12,4 @@ export default function Template(template) {
 
     return target;
   }
-};
+}

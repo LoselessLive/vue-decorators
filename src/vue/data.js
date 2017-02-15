@@ -1,6 +1,6 @@
 import specialKeys from '../special.keys';
 
-export default function Data(data) {
+export function Data(data) {
   if(typeof data !== 'object'){
     console.error('[Vue decorator error] data must be a object');
 
@@ -19,4 +19,4 @@ export default function Data(data) {
 
     return target;
   }
-};
+}

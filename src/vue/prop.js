@@ -18,10 +18,10 @@ function makePropDecorator(options) {
   }
 }
 
-export default function Prop(options, key, descriptor) {
+export function Prop(options, key, descriptor) {
   if(options instanceof Vue){
     return makePropDecorator()(options, key);
   }
 
   return makePropDecorator(options);
-};
+}

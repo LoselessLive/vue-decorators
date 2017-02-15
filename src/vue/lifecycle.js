@@ -18,7 +18,7 @@ function makeLifecycleDecorator(options){
   }
 }
 
-export default function Lifecycle(options, key, descriptor){
+export function Lifecycle(options, key, descriptor){
   if(options instanceof Vue){
     return makeLifecycleDecorator()(options, key);
   }

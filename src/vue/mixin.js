@@ -1,6 +1,6 @@
 import specialKeys from '../special.keys';
 
-export default function Mixin(mixin) {
+export function Mixin(mixin) {
   if(typeof mixin !== 'object'){
     console.error('[Vue decorator error] mixin must be a object');
 
@@ -16,4 +16,4 @@ export default function Mixin(mixin) {
 
     return target;
   }
-};
+}

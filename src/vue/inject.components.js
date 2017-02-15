@@ -1,6 +1,6 @@
 import specialKeys from '../special.keys';
 
-export default function InjectComponents(components) {
+export function InjectComponents(components) {
   if(typeof components !== 'object'){
     console.error('[Vue decorator error] components must be a object');
 
@@ -19,4 +19,4 @@ export default function InjectComponents(components) {
 
     return target;
   }
-};
+}

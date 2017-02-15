@@ -19,10 +19,10 @@ function makeGetterDecorator(options){
   }
 }
 
-export default function(options, key, descriptor){
+export function Getter(options, key, descriptor){
   if(options instanceof Vue){
     return makeGetterDecorator()(options, key);
   }
 
   return makeGetterDecorator(options);
-};
+}

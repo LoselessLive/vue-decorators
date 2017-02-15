@@ -78,34 +78,52 @@ function componentFactory(options = {}){
     noptions.data = function(){
       return combineDataObject(this, Component, options.data);
     };
-    noptions.props = {
-      ...options.props,
-      ...proto[specialKeys.PROPS]
-    };
-    noptions.components = {
-      ...options.components,
-      ...Component[specialKeys.COMPONENTS]
-    };
-    noptions.computed = {
-      ...options.computed,
-      ...proto[specialKeys.COMPUTED],
-      ...proto[specialKeys.STATES],
-      ...proto[specialKeys.GETTERS]
-    };
-    noptions.methods = {
-      ...options.methods,
-      ...proto[specialKeys.METHODS],
-      ...proto[specialKeys.ACTIONS],
-      ...proto[specialKeys.MUTATIONS]
-    };
-    noptions.watch = {
-      ...options.watch,
-      ...proto[specialKeys.WATCHERS]
-    };
-    noptions.filters = {
-      ...options.filters,
-      ...proto[specialKeys.FILTERS]
-    };
+
+    if(proto[specialKeys.PROPS]){
+      noptions.props = {
+        ...options.props,
+        ...proto[specialKeys.PROPS]
+      };
+    }
+
+    if(Component[specialKeys.COMPONENTS]){
+      noptions.components = {
+        ...options.components,
+        ...Component[specialKeys.COMPONENTS]
+      };
+    }
+
+    if(proto[specialKeys.COMPUTED] || proto[specialKeys.STATES] || proto[specialKeys.GETTERS]){
+      noptions.computed = {
+        ...options.computed,
+        ...proto[specialKeys.COMPUTED],
+        ...proto[specialKeys.STATES],
+        ...proto[specialKeys.GETTERS]
+      };
+    }
+
+    if(proto[specialKeys.METHODS] || proto[specialKeys.ACTIONS] || proto[specialKeys.MUTATIONS]){
+      noptions.methods = {
+        ...options.methods,
+        ...proto[specialKeys.METHODS],
+        ...proto[specialKeys.ACTIONS],
+        ...proto[specialKeys.MUTATIONS]
+      };
+    }
+
+    if(proto[specialKeys.WATCHERS]){
+      noptions.watch = {
+        ...options.watch,
+        ...proto[specialKeys.WATCHERS]
+      };
+    }
+
+    if(proto[specialKeys.FILTERS]){
+      noptions.filters = {
+        ...options.filters,
+        ...proto[specialKeys.FILTERS]
+      };
+    }
 
     if(Component[specialKeys.TEMPLATE]){
       noptions.template = Component[specialKeys.TEMPLATE];
@@ -122,10 +140,10 @@ function componentFactory(options = {}){
   }
 }
 
-export default function Component(options){
+export function Component(options){
   if(options instanceof Function){
     return componentFactory()(options);
   }
 
   return componentFactory(options);
-};
+}

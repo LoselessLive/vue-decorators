@@ -19,10 +19,10 @@ function makeActionDecorator(options){
   }
 }
 
-export default function(options, key, descriptor){
+export function Action(options, key, descriptor){
   if(options instanceof Vue){
     return makeActionDecorator()(options, key);
   }
 
   return makeActionDecorator(options);
-};
+}
