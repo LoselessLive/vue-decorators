@@ -69,16 +69,23 @@ function componentFactory(options = {}){
       proto[specialKeys.METHODS][method] = proto[method];
     }
 
-    /** Combine **/
+    /** Combine, Lifecycle, Name & Data **/
     noptions = {
       ...options,
       ...proto[specialKeys.LIFECYCLE]
     };
+
     noptions.name = options.name || Component.name;
     noptions.data = function(){
       return combineDataObject(this, Component, options.data);
     };
 
+    /** Template **/
+    if(Component[specialKeys.TEMPLATE]){
+      noptions.template = Component[specialKeys.TEMPLATE];
+    }
+
+    /** Props **/
     if(proto[specialKeys.PROPS]){
       noptions.props = {
         ...options.props,
@@ -86,6 +93,7 @@ function componentFactory(options = {}){
       };
     }
 
+    /** Components **/
     if(Component[specialKeys.COMPONENTS]){
       noptions.components = {
         ...options.components,
@@ -93,6 +101,15 @@ function componentFactory(options = {}){
       };
     }
 
+    /** Directives **/
+    if(Component[specialKeys.DIRECTIVES]){
+      noptions.directives = {
+        ...noptions.directives,
+        ...Component[specialKeys.DIRECTIVES]
+      };
+    }
+
+    /** Computed **/
     if(proto[specialKeys.COMPUTED] || proto[specialKeys.STATES] || proto[specialKeys.GETTERS]){
       noptions.computed = {
         ...options.computed,
@@ -102,6 +119,7 @@ function componentFactory(options = {}){
       };
     }
 
+    /** Methods **/
     if(proto[specialKeys.METHODS] || proto[specialKeys.ACTIONS] || proto[specialKeys.MUTATIONS]){
       noptions.methods = {
         ...options.methods,
@@ -111,6 +129,7 @@ function componentFactory(options = {}){
       };
     }
 
+    /** Watchers **/
     if(proto[specialKeys.WATCHERS]){
       noptions.watch = {
         ...options.watch,
@@ -118,6 +137,7 @@ function componentFactory(options = {}){
       };
     }
 
+    /** Filters **/
     if(proto[specialKeys.FILTERS]){
       noptions.filters = {
         ...options.filters,
@@ -125,13 +145,7 @@ function componentFactory(options = {}){
       };
     }
 
-    if(Component[specialKeys.TEMPLATE]){
-      noptions.template = Component[specialKeys.TEMPLATE];
-    }
-
-    if(options.mixins){
-      (noptions.mixins || (noptions.mixins = [])).push(...options.mixins);
-    }
+    /** Mixins **/
     if(Component[specialKeys.MIXINS]){
       (noptions.mixins || (noptions.mixins = [])).push(...Component[specialKeys.MIXINS]);
     }

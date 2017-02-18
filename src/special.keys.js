@@ -10,12 +10,17 @@ export default {
     'COMPUTED': '$_vd_computed',
     'LIFECYCLE': '$_vd_lifecycle',
     'COMPONENTS': '$_vd_components',
+    'DIRECTIVES': '$_vd_directives',
 
     /** Vuex decorators **/
     'STATES': '$_vd_states',
     'GETTERS': '$_vd_getters',
     'ACTIONS': '$_vd_actions',
     'MUTATIONS': '$_vd_mutations',
+
+    'MODULES': '$_vd_modules',
+    'PLUGINS': '$_vd_plugins',
+    'SUBSCRIBERS': '$_vd_subscribers',
 
     /** Others **/
     'USED_PROPS': '$_vd_used_props'

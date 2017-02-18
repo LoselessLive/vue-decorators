@@ -1,5 +1,5 @@
 /**
- * Vue-decorators v1.1.3
+ * Vue-decorators v1.1.7
  * (c) 2017 Paweł Partyka
  * @license MIT
  */
@@ -10,7 +10,8 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var Vue = _interopDefault(require('vue'));
-var vuex = require('vuex');
+var Vuex = require('vuex');
+var Vuex__default = _interopDefault(Vuex);
 
 var specialKeys = {
     /** Vue decorators **/
@@ -24,12 +25,17 @@ var specialKeys = {
     'COMPUTED': '$_vd_computed',
     'LIFECYCLE': '$_vd_lifecycle',
     'COMPONENTS': '$_vd_components',
+    'DIRECTIVES': '$_vd_directives',
 
     /** Vuex decorators **/
     'STATES': '$_vd_states',
     'GETTERS': '$_vd_getters',
     'ACTIONS': '$_vd_actions',
     'MUTATIONS': '$_vd_mutations',
+
+    'MODULES': '$_vd_modules',
+    'PLUGINS': '$_vd_plugins',
+    'SUBSCRIBERS': '$_vd_subscribers',
 
     /** Others **/
     'USED_PROPS': '$_vd_used_props'
@@ -131,7 +137,7 @@ function componentFactory() {
         proto[specialKeys.METHODS][method] = proto[method];
       }
 
-      /** Combine **/
+      /** Combine, Lifecycle, Name & Data **/
     } catch (err) {
       _didIteratorError2 = true;
       _iteratorError2 = err;
@@ -148,48 +154,57 @@ function componentFactory() {
     }
 
     noptions = _extends({}, options, proto[specialKeys.LIFECYCLE]);
+
     noptions.name = options.name || Component.name;
     noptions.data = function () {
       return combineDataObject(this, Component, options.data);
     };
 
-    if (proto[specialKeys.PROPS]) {
-      noptions.props = _extends({}, options.props, proto[specialKeys.PROPS]);
-    }
-
-    if (Component[specialKeys.COMPONENTS]) {
-      noptions.components = _extends({}, options.components, Component[specialKeys.COMPONENTS]);
-    }
-
-    if (proto[specialKeys.COMPUTED] || proto[specialKeys.STATES] || proto[specialKeys.GETTERS]) {
-      noptions.computed = _extends({}, options.computed, proto[specialKeys.COMPUTED], proto[specialKeys.STATES], proto[specialKeys.GETTERS]);
-    }
-
-    if (proto[specialKeys.METHODS] || proto[specialKeys.ACTIONS] || proto[specialKeys.MUTATIONS]) {
-      noptions.methods = _extends({}, options.methods, proto[specialKeys.METHODS], proto[specialKeys.ACTIONS], proto[specialKeys.MUTATIONS]);
-    }
-
-    if (proto[specialKeys.WATCHERS]) {
-      noptions.watch = _extends({}, options.watch, proto[specialKeys.WATCHERS]);
-    }
-
-    if (proto[specialKeys.FILTERS]) {
-      noptions.filters = _extends({}, options.filters, proto[specialKeys.FILTERS]);
-    }
-
+    /** Template **/
     if (Component[specialKeys.TEMPLATE]) {
       noptions.template = Component[specialKeys.TEMPLATE];
     }
 
-    if (options.mixins) {
+    /** Props **/
+    if (proto[specialKeys.PROPS]) {
+      noptions.props = _extends({}, options.props, proto[specialKeys.PROPS]);
+    }
+
+    /** Components **/
+    if (Component[specialKeys.COMPONENTS]) {
+      noptions.components = _extends({}, options.components, Component[specialKeys.COMPONENTS]);
+    }
+
+    /** Directives **/
+    if (Component[specialKeys.DIRECTIVES]) {
+      noptions.directives = _extends({}, noptions.directives, Component[specialKeys.DIRECTIVES]);
+    }
+
+    /** Computed **/
+    if (proto[specialKeys.COMPUTED] || proto[specialKeys.STATES] || proto[specialKeys.GETTERS]) {
+      noptions.computed = _extends({}, options.computed, proto[specialKeys.COMPUTED], proto[specialKeys.STATES], proto[specialKeys.GETTERS]);
+    }
+
+    /** Methods **/
+    if (proto[specialKeys.METHODS] || proto[specialKeys.ACTIONS] || proto[specialKeys.MUTATIONS]) {
+      noptions.methods = _extends({}, options.methods, proto[specialKeys.METHODS], proto[specialKeys.ACTIONS], proto[specialKeys.MUTATIONS]);
+    }
+
+    /** Watchers **/
+    if (proto[specialKeys.WATCHERS]) {
+      noptions.watch = _extends({}, options.watch, proto[specialKeys.WATCHERS]);
+    }
+
+    /** Filters **/
+    if (proto[specialKeys.FILTERS]) {
+      noptions.filters = _extends({}, options.filters, proto[specialKeys.FILTERS]);
+    }
+
+    /** Mixins **/
+    if (Component[specialKeys.MIXINS]) {
       var _ref;
 
-      (_ref = noptions.mixins || (noptions.mixins = [])).push.apply(_ref, _toConsumableArray(options.mixins));
-    }
-    if (Component[specialKeys.MIXINS]) {
-      var _ref2;
-
-      (_ref2 = noptions.mixins || (noptions.mixins = [])).push.apply(_ref2, _toConsumableArray(Component[specialKeys.MIXINS]));
+      (_ref = noptions.mixins || (noptions.mixins = [])).push.apply(_ref, _toConsumableArray(Component[specialKeys.MIXINS]));
     }
 
     return noptions;
@@ -254,8 +269,54 @@ var _extends$3 = Object.assign || function (target) { for (var i = 1; i < argume
 
 var _typeof$2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function InjectDirective(directiveName, directive) {
+  if ((typeof directive === 'undefined' ? 'undefined' : _typeof$2(directive)) !== 'object') {
+    console.error('[Vue decorator error] directive must be a object');
+
+    return directive;
+  }
+
+  return function (target) {
+    if (!target[specialKeys.DIRECTIVES]) {
+      target[specialKeys.DIRECTIVES] = {};
+    }
+
+    target[specialKeys.DIRECTIVES] = _extends$3({}, target[specialKeys.DIRECTIVES], _defineProperty$1({}, directiveName, directive));
+
+    return target;
+  };
+}
+
+var _extends$4 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$3 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function InjectDirectives(directives) {
+  if ((typeof directives === 'undefined' ? 'undefined' : _typeof$3(directives)) !== 'object') {
+    console.error('[Vue decorator error] directives must be a object');
+
+    return directives;
+  }
+
+  return function (target) {
+    if (!target[specialKeys.DIRECTIVES]) {
+      target[specialKeys.DIRECTIVES] = {};
+    }
+
+    target[specialKeys.DIRECTIVES] = _extends$4({}, target[specialKeys.DIRECTIVES], directives);
+
+    return target;
+  };
+}
+
+var _extends$5 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$4 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function Data(data) {
-  if ((typeof data === 'undefined' ? 'undefined' : _typeof$2(data)) !== 'object') {
+  if ((typeof data === 'undefined' ? 'undefined' : _typeof$4(data)) !== 'object') {
     console.error('[Vue decorator error] data must be a object');
 
     return data;
@@ -266,7 +327,7 @@ function Data(data) {
       target[specialKeys.DATA] = {};
     }
 
-    target[specialKeys.DATA] = _extends$3({}, target[specialKeys.DATA], data);
+    target[specialKeys.DATA] = _extends$5({}, target[specialKeys.DATA], data);
 
     return target;
   };
@@ -322,10 +383,10 @@ function Watch(options, key, descriptor) {
   return makeWatchDecorator(options);
 }
 
-var _typeof$3 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof$5 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function Mixin(mixin) {
-  if ((typeof mixin === 'undefined' ? 'undefined' : _typeof$3(mixin)) !== 'object') {
+  if ((typeof mixin === 'undefined' ? 'undefined' : _typeof$5(mixin)) !== 'object') {
     console.error('[Vue decorator error] mixin must be a object');
 
     return mixin;
@@ -453,34 +514,332 @@ function Lifecycle(options, key, descriptor) {
   return makeLifecycleDecorator(options);
 }
 
-function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+var _extends$6 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function _toConsumableArray$2(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function storeFactory() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  return function (Store) {
+    var noptions = {};
+    var proto = Store.prototype;
+
+    /** Combine **/
+    noptions = _extends$6({}, options);
+
+    /** States **/
+    if (proto[specialKeys.STATES]) {
+      var instanceStore = new Store();
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = proto[specialKeys.STATES][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var key = _step.value;
+
+          noptions.state[key] = instanceStore[key];
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    /** Actions **/
+    if (proto[specialKeys.ACTIONS]) {
+      noptions.actions = _extends$6({}, options.actions, proto[specialKeys.ACTIONS]);
+    }
+
+    /** Getters **/
+    if (proto[specialKeys.GETTERS]) {
+      noptions.getters = _extends$6({}, options.getters, proto[specialKeys.GETTERS]);
+    }
+
+    /** Mutations **/
+    if (proto[specialKeys.MUTATIONS]) {
+      noptions.mutations = _extends$6({}, options.mutations, proto[specialKeys.MUTATIONS]);
+    }
+
+    /** Modules **/
+    if (Store[specialKeys.MODULES]) {
+      noptions.modules = _extends$6({}, options.modules, Store[specialKeys.MODULES]);
+    }
+
+    /** Plugins **/
+    if (Store[specialKeys.PLUGINS]) {
+      var _ref;
+
+      (_ref = noptions.plugins || (noptions.plugins = [])).push.apply(_ref, _toConsumableArray$2(Store[specialKeys.PLUGINS]));
+    }
+
+    var storeInstance = new Vuex__default.Store(noptions);
+
+    /** Subscribers **/
+    if (proto[specialKeys.SUBSCRIBERS]) {
+      for (var _key in proto[specialKeys.SUBSCRIBERS]) {
+        storeInstance.subscribe(proto[specialKeys.SUBSCRIBERS][_key]);
+      }
+    }
+
+    return storeInstance;
+  };
+}
+
+function Store(options) {
+  if (options instanceof Function) {
+    return storeFactory()(options);
+  }
+
+  return storeFactory(options);
+}
+
+var _extends$7 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+function storeFactory$1() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  return function (Store) {
+    var noptions = {};
+    var proto = Store.prototype;
+
+    /** Combine **/
+    noptions = _extends$7({}, options);
+
+    /** States **/
+    if (proto[specialKeys.STATES]) {
+      var instanceStore = new Store();
+
+      if (!noptions.state) {
+        noptions.state = {};
+      }
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = proto[specialKeys.STATES][Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var key = _step.value;
+
+          noptions.state[key] = instanceStore[key];
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    /** Actions **/
+    if (proto[specialKeys.ACTIONS]) {
+      noptions.actions = _extends$7({}, options.actions, proto[specialKeys.ACTIONS]);
+    }
+
+    /** Getters **/
+    if (proto[specialKeys.GETTERS]) {
+      noptions.getters = _extends$7({}, options.getters, proto[specialKeys.GETTERS]);
+    }
+
+    /** Mutations **/
+    if (proto[specialKeys.MUTATIONS]) {
+      noptions.mutations = _extends$7({}, options.mutations, proto[specialKeys.MUTATIONS]);
+    }
+
+    /** Modules **/
+    if (Store[specialKeys.MODULES]) {
+      noptions.modules = _extends$7({}, options.modules, Store[specialKeys.MODULES]);
+    }
+
+    return noptions;
+  };
+}
+
+function Module(options) {
+  if (options instanceof Function) {
+    return storeFactory$1()(options);
+  }
+
+  return storeFactory$1(options);
+}
+
+function makeSubscribeDecorator(options) {
+  return function (target, key) {
+    if (!target[specialKeys.USED_PROPS]) {
+      target[specialKeys.USED_PROPS] = {};
+    }
+
+    if (!target[specialKeys.SUBSCRIBERS]) {
+      target[specialKeys.SUBSCRIBERS] = {};
+    }
+
+    if (!target[specialKeys.SUBSCRIBERS][key]) {
+      target[specialKeys.USED_PROPS][key] = true;
+      target[specialKeys.SUBSCRIBERS][key] = target[key];
+    }
+  };
+}
+
+function Subscribe(options, key, descriptor) {
+  if (options instanceof Vuex__default.Store) {
+    return makeSubscribeDecorator()(options, key);
+  }
+
+  return makeSubscribeDecorator(options);
+}
+
+var _extends$8 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$6 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _defineProperty$2(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function InjectModule(moduleName, module) {
+  if ((typeof module === 'undefined' ? 'undefined' : _typeof$6(module)) !== 'object') {
+    console.error('[Vue decorator error] module must be a object');
+
+    return module;
+  }
+
+  return function (target) {
+    if (!target[specialKeys.MODULES]) {
+      target[specialKeys.MODULES] = {};
+    }
+
+    target[specialKeys.MODULES] = _extends$8({}, target[specialKeys.MODULES], _defineProperty$2({}, moduleName, module));
+
+    return target;
+  };
+}
+
+var _extends$9 = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _typeof$7 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function InjectModules(modules) {
+  if ((typeof modules === 'undefined' ? 'undefined' : _typeof$7(modules)) !== 'object') {
+    console.error('[Vue decorator error] modules must be a object');
+
+    return modules;
+  }
+
+  return function (target) {
+    if (!target[specialKeys.MODULES]) {
+      target[specialKeys.MODULES] = {};
+    }
+
+    target[specialKeys.MODULES] = _extends$9({}, target[specialKeys.MODULES], modules);
+
+    return target;
+  };
+}
+
+function InjectPlugin(plugin) {
+  if (typeof plugin !== 'function') {
+    console.error('[Vue decorator error] plugin must be a function');
+
+    return plugin;
+  }
+
+  return function (target) {
+    if (target[specialKeys.PLUGINS]) {
+      target[specialKeys.PLUGINS].push(plugin);
+    } else {
+      target[specialKeys.PLUGINS] = [plugin];
+    }
+
+    return target;
+  };
+}
+
+function _toConsumableArray$3(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function InjectPlugins(plugins) {
+  if (!(plugins instanceof Array)) {
+    console.error('[Vue decorator error] plugins must be a array');
+
+    return plugins;
+  }
+
+  return function (target) {
+    if (target[specialKeys.PLUGINS]) {
+      var _target$specialKeys$P;
+
+      (_target$specialKeys$P = target[specialKeys.PLUGINS]).push.apply(_target$specialKeys$P, _toConsumableArray$3(plugins));
+    } else {
+      target[specialKeys.PLUGINS] = plugins;
+    }
+
+    return target;
+  };
+}
+
+var _typeof$8 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+function _defineProperty$3(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function makeStateDecorator(options) {
+  var store = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
       target[specialKeys.USED_PROPS] = {};
     }
 
     if (!target[specialKeys.STATES]) {
-      target[specialKeys.STATES] = {};
+      if (store) {
+        target[specialKeys.STATES] = [];
+      } else {
+        target[specialKeys.STATES] = {};
+      }
     }
 
     if (!target[specialKeys.STATES][key]) {
-      var fc = void 0;
-
-      if (typeof options === 'function') {
-        fc = vuex.mapState(_defineProperty$1({}, key, options))[key];
-      } else {
-        fc = vuex.mapState([options || key])[options || key];
-      }
-
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.STATES][key] = fc;
+
+      if (store) {
+        target[specialKeys.STATES].push(key);
+      } else {
+        var fc = void 0;
+
+        if (typeof options === 'function') {
+          fc = Vuex.mapState(_defineProperty$3({}, key, options))[key];
+        } else {
+          fc = Vuex.mapState([options || key])[options || key];
+        }
+
+        target[specialKeys.STATES][key] = fc;
+      }
     }
   };
 }
 
 function State(options, key, descriptor) {
+  if (options instanceof Vuex__default.Store || (typeof options === 'undefined' ? 'undefined' : _typeof$8(options)) === 'object' && !(options instanceof Vue)) {
+    return makeStateDecorator(undefined, true)(options, key);
+  }
+
   if (options instanceof Vue) {
     return makeStateDecorator()(options, key);
   }
@@ -488,7 +847,11 @@ function State(options, key, descriptor) {
   return makeStateDecorator(options);
 }
 
+var _typeof$9 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function makeActionDecorator(options) {
+  var store = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
       target[specialKeys.USED_PROPS] = {};
@@ -500,12 +863,21 @@ function makeActionDecorator(options) {
 
     if (!target[specialKeys.ACTIONS][key]) {
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.ACTIONS][key] = vuex.mapActions([options || key])[options || key];
+
+      if (store) {
+        target[specialKeys.ACTIONS][key] = target[key];
+      } else {
+        target[specialKeys.ACTIONS][key] = Vuex.mapActions([options || key])[options || key];
+      }
     }
   };
 }
 
 function Action(options, key, descriptor) {
+  if (options instanceof Vuex__default.Store || (typeof options === 'undefined' ? 'undefined' : _typeof$9(options)) === 'object' && !(options instanceof Vue)) {
+    return makeActionDecorator(undefined, true)(options, key);
+  }
+
   if (options instanceof Vue) {
     return makeActionDecorator()(options, key);
   }
@@ -513,7 +885,11 @@ function Action(options, key, descriptor) {
   return makeActionDecorator(options);
 }
 
+var _typeof$10 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function makeGetterDecorator(options) {
+  var store = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
       target[specialKeys.USED_PROPS] = {};
@@ -525,12 +901,21 @@ function makeGetterDecorator(options) {
 
     if (!target[specialKeys.GETTERS][key]) {
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.GETTERS][key] = vuex.mapGetters([options || key])[options || key];
+
+      if (store) {
+        target[specialKeys.GETTERS][key] = target[key];
+      } else {
+        target[specialKeys.GETTERS][key] = Vuex.mapGetters([options || key])[options || key];
+      }
     }
   };
 }
 
 function Getter(options, key, descriptor) {
+  if (options instanceof Vuex__default.Store || (typeof options === 'undefined' ? 'undefined' : _typeof$10(options)) === 'object' && !(options instanceof Vue)) {
+    return makeGetterDecorator(undefined, true)(options, key);
+  }
+
   if (options instanceof Vue) {
     return makeGetterDecorator()(options, key);
   }
@@ -538,7 +923,11 @@ function Getter(options, key, descriptor) {
   return makeGetterDecorator(options);
 }
 
+var _typeof$11 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function makeMutationDecorator(options) {
+  var store = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
   return function (target, key) {
     if (!target[specialKeys.USED_PROPS]) {
       target[specialKeys.USED_PROPS] = {};
@@ -550,12 +939,21 @@ function makeMutationDecorator(options) {
 
     if (!target[specialKeys.MUTATIONS][key]) {
       target[specialKeys.USED_PROPS][key] = true;
-      target[specialKeys.MUTATIONS][key] = vuex.mapMutations([options || key])[options || key];
+
+      if (store) {
+        target[specialKeys.MUTATIONS][key] = target[key];
+      } else {
+        target[specialKeys.MUTATIONS][key] = Vuex.mapMutations([options || key])[options || key];
+      }
     }
   };
 }
 
 function Mutation(options, key, descriptor) {
+  if (options instanceof Vuex__default.Store || (typeof options === 'undefined' ? 'undefined' : _typeof$11(options)) === 'object' && !(options instanceof Vue)) {
+    return makeMutationDecorator(undefined, true)(options, key);
+  }
+
   if (options instanceof Vue) {
     return makeMutationDecorator()(options, key);
   }
@@ -568,6 +966,8 @@ function Mutation(options, key, descriptor) {
 exports.Component = Component;
 exports.InjectComponent = InjectComponent;
 exports.InjectComponents = InjectComponents;
+exports.InjectDirective = InjectDirective;
+exports.InjectDirectives = InjectDirectives;
 exports.Data = Data;
 exports.Prop = Prop;
 exports.Watch = Watch;
@@ -577,6 +977,13 @@ exports.Filter = Filter;
 exports.Template = Template;
 exports.Computed = Computed;
 exports.Lifecycle = Lifecycle;
+exports.Store = Store;
+exports.Module = Module;
+exports.Subscribe = Subscribe;
+exports.InjectModule = InjectModule;
+exports.InjectModules = InjectModules;
+exports.InjectPlugin = InjectPlugin;
+exports.InjectPlugins = InjectPlugins;
 exports.State = State;
 exports.Action = Action;
 exports.Getter = Getter;

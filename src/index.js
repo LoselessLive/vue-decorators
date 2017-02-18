@@ -2,6 +2,8 @@
 export {Component} from './vue/component';
 export {InjectComponent} from './vue/inject.component';
 export {InjectComponents} from './vue/inject.components';
+export {InjectDirective} from './vue/inject.directive';
+export {InjectDirectives} from './vue/inject.directives';
 
 export {Data} from './vue/data';
 export {Prop} from './vue/prop';
@@ -14,6 +16,14 @@ export {Computed} from './vue/computed';
 export {Lifecycle} from './vue/lifecycle';
 
 /** Vuex decorators **/
+export {Store} from './store/store';
+export {Module} from './store/module';
+export {Subscribe} from './store/subscribe';
+export {InjectModule} from './store/inject.module';
+export {InjectModules} from './store/inject.modules';
+export {InjectPlugin} from './store/inject.plugin';
+export {InjectPlugins} from './store/inject.plugins';
+
 export {State} from './vuex/state';
 export {Action} from './vuex/action';
 export {Getter} from './vuex/getter';
